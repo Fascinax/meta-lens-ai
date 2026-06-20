@@ -166,10 +166,11 @@ class WearablesViewModel(application: Application) : AndroidViewModel(applicatio
             val session =
                 try {
                     val quality = AppSettings.getCameraVideoQuality(getApplication())
+                    val frameRate = AppSettings.getCameraFrameRate(getApplication())
                     Wearables.startStreamSession(
                         getApplication(),
                         deviceSelector,
-                        StreamConfiguration(videoQuality = quality, 24),
+                        StreamConfiguration(videoQuality = quality, frameRate = frameRate),
                     )
                 } catch (t: Throwable) {
                     _uiState.update {
@@ -293,10 +294,11 @@ class WearablesViewModel(application: Application) : AndroidViewModel(applicatio
             val session =
                 try {
                     val quality = AppSettings.getCameraVideoQuality(getApplication())
+                    val frameRate = AppSettings.getCameraFrameRate(getApplication())
                     Wearables.startStreamSession(
                         getApplication(),
                         deviceSelector,
-                        StreamConfiguration(videoQuality = quality, 24),
+                        StreamConfiguration(videoQuality = quality, frameRate = frameRate),
                     )
                 } catch (t: Throwable) {
                     _uiState.update {

@@ -126,6 +126,11 @@ fun StreamScreen(
                 style = MaterialTheme.typography.bodySmall,
             )
             Text(
+                text = "fps=${AppSettings.getCameraFrameRate(context)}",
+                color = Color.White,
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Text(
                 text = "frames=${uiState.frameCount}",
                 color = Color.White,
                 style = MaterialTheme.typography.bodySmall,

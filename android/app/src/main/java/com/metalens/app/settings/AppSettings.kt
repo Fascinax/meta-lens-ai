@@ -11,6 +11,7 @@ object AppSettings {
     private const val KEY_OPENAI_API_KEY = "openai_api_key"
     private const val KEY_OPENAI_MODEL = "openai_model"
     private const val KEY_CAMERA_VIDEO_QUALITY = "camera_video_quality"
+    private const val KEY_CAMERA_FRAME_RATE = "camera_frame_rate"
     private const val KEY_PICTURE_ANALYSIS_SYSTEM_INSTRUCTIONS = "picture_analysis_system_instructions_override"
     private const val KEY_CONVERSATION_SYSTEM_INSTRUCTIONS = "conversation_system_instructions_override"
 
@@ -54,6 +55,24 @@ object AppSettings {
     fun setCameraVideoQuality(context: Context, quality: VideoQuality) {
         val prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().putString(KEY_CAMERA_VIDEO_QUALITY, quality.name).apply()
+    }
+
+    fun getCameraFrameRate(context: Context): Int {
+        val prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val stored = prefs.getInt(KEY_CAMERA_FRAME_RATE, 24)
+        return when (stored) {
+            24, 30, 60 -> stored
+            else -> 24
+        }
+    }
+
+    fun setCameraFrameRate(context: Context, frameRate: Int) {
+        val normalized = when (frameRate) {
+            24, 30, 60 -> frameRate
+            else -> 24
+        }
+        val prefs = context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putInt(KEY_CAMERA_FRAME_RATE, normalized).apply()
     }
 
     fun getPictureAnalysisSystemInstructions(context: Context): String {

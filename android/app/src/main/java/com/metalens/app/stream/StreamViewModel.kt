@@ -58,7 +58,10 @@ class StreamViewModel(
                 Wearables.startStreamSession(
                     getApplication(),
                     deviceSelector,
-                    StreamConfiguration(videoQuality = AppSettings.getCameraVideoQuality(getApplication()), 24),
+                    StreamConfiguration(
+                        videoQuality = AppSettings.getCameraVideoQuality(getApplication()),
+                        frameRate = AppSettings.getCameraFrameRate(getApplication()),
+                    ),
                 ).also { streamSession = it }
             } catch (t: Throwable) {
                 Log.e(TAG, "startStreamSession() failed", t)

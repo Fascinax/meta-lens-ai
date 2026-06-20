@@ -116,7 +116,7 @@ fun SettingsScreen(
 
     var openAiModel by rememberSaveable {
         val saved = AppSettings.getOpenAiModel(context).trim()
-        val initial = saved.takeIf { it in modelOptions } ?: OpenAIRealtimeClient.DEFAULT_MODEL
+        val initial = saved.ifBlank { OpenAIRealtimeClient.DEFAULT_MODEL }
         mutableStateOf(initial)
     }
 
@@ -143,6 +143,13 @@ fun SettingsScreen(
     }
     var showSelectCameraQualityDialog by rememberSaveable { mutableStateOf(false) }
     var cameraQualityDraft by rememberSaveable { mutableStateOf(cameraQuality) }
+
+    val frameRateOptions = rememberSaveable { listOf(24, 30, 60) }
+    var cameraFrameRate by rememberSaveable {
+        mutableStateOf(AppSettings.getCameraFrameRate(context))
+    }
+    var showSelectFrameRateDialog by rememberSaveable { mutableStateOf(false) }
+    var frameRateDraft by rememberSaveable { mutableStateOf(cameraFrameRate) }
 
     val scope = rememberCoroutineScope()
     var isCheckingConnection by rememberSaveable { mutableStateOf(false) }
@@ -183,6 +190,12 @@ fun SettingsScreen(
     LaunchedEffect(showSelectCameraQualityDialog) {
         if (showSelectCameraQualityDialog) {
             cameraQualityDraft = cameraQuality
+        }
+    }
+
+    LaunchedEffect(showSelectFrameRateDialog) {
+        if (showSelectFrameRateDialog) {
+            frameRateDraft = cameraFrameRate
         }
     }
 
@@ -282,6 +295,19 @@ fun SettingsScreen(
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    OutlinedTextField(
+                        value = modelDraft,
+                        onValueChange = { modelDraft = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        label = { Text(stringResource(R.string.settings_openai_model_custom_label)) },
+                        supportingText = {
+                            Text(stringResource(R.string.settings_openai_model_custom_hint))
+                        },
+                    )
                 }
             },
             confirmButton = {
@@ -520,6 +546,65 @@ fun SettingsScreen(
                             contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         ),
                     onClick = { showSelectCameraQualityDialog = false },
+                ) {
+                    Text(stringResource(R.string.common_cancel))
+                }
+            },
+        )
+    }
+
+    if (showSelectFrameRateDialog) {
+        AlertDialog(
+            onDismissRequest = { showSelectFrameRateDialog = false },
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            textContentColor = MaterialTheme.colorScheme.onSurface,
+            title = { Text(stringResource(R.string.settings_camera_frame_rate_title)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    frameRateOptions.forEach { frameRate ->
+                        val isSelected = frameRate == frameRateDraft
+                        val subtitle =
+                            if (frameRate == 60) {
+                                stringResource(R.string.settings_camera_frame_rate_60_desc)
+                            } else {
+                                stringResource(R.string.settings_camera_frame_rate_standard_desc)
+                            }
+
+                        FeatureActionCard(
+                            title = "$frameRate fps",
+                            subtitle = subtitle,
+                            icon = if (isSelected) Icons.Filled.CheckCircle else Icons.Filled.Videocam,
+                            onClick = { frameRateDraft = frameRate },
+                            enabled = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    colors =
+                        ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.primary,
+                        ),
+                    onClick = {
+                        val selected = frameRateOptions.firstOrNull { it == frameRateDraft } ?: 24
+                        AppSettings.setCameraFrameRate(context, selected)
+                        cameraFrameRate = selected
+                        showSelectFrameRateDialog = false
+                    },
+                ) {
+                    Text(stringResource(R.string.common_save))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    colors =
+                        ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        ),
+                    onClick = { showSelectFrameRateDialog = false },
                 ) {
                     Text(stringResource(R.string.common_cancel))
                 }
@@ -797,9 +882,19 @@ fun SettingsScreen(
             }
         FeatureActionCard(
             title = stringResource(R.string.settings_camera_quality_title),
-            subtitle = "${cameraQualityValue.name} — $cameraQualityDesc",
+            subtitle = "${cameraQualityValue.name} - $cameraQualityDesc",
             icon = Icons.Filled.Videocam,
             onClick = { showSelectCameraQualityDialog = true },
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        FeatureActionCard(
+            title = stringResource(R.string.settings_camera_frame_rate_title),
+            subtitle = "$cameraFrameRate fps",
+            icon = Icons.Filled.Videocam,
+            onClick = { showSelectFrameRateDialog = true },
             modifier = Modifier.fillMaxWidth(),
         )
 
